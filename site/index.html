@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noindex">
+  <title>Veille cyber</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="./">Veille cyber</a>
+    <nav aria-label="Pages">
+      <a href="./" aria-current="page">Actualités</a>
+      <a href="ctf.html">CTF</a>
+    </nav>
+    <div class="stamp">
+      <span id="stamp" role="status">Chargement…</span>
+      <button id="refresh" type="button">Actualiser</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="rail" aria-label="Filtres">
+      <div class="search">
+        <label class="sr" for="q">Rechercher dans les articles</label>
+        <input id="q" type="search" placeholder="Rechercher (touche /)" autocomplete="off">
+      </div>
+      <div>
+        <h2>Rubriques</h2>
+        <div id="filters" class="filters"></div>
+      </div>
+      <div id="sources-box">
+        <h2>Sources</h2>
+        <div id="sources" class="filters"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="hide-read"> Masquer les articles lus</label>
+    </aside>
+    <main id="feed" aria-live="polite">
+      <div class="panel"><div class="empty">Chargement des actualités…</div></div>
+    </main>
+  </div>
+
+  <footer>
+    <details>
+      <summary id="status-summary">État des sources</summary>
+      <ul id="status-list" class="status"></ul>
+    </details>
+  </footer>
+
+  <script src="assets/common.js"></script>
+  <script src="assets/news.js"></script>
+</body>
+</html>

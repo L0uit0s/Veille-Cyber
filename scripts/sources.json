@@ -1,0 +1,204 @@
+{
+  "retention_hours": 72,
+  "max_per_source": 40,
+  "ransomware_world_cap": 40,
+  "ctf_days_ahead": 120,
+  "ctf_news_retention_hours": 336,
+
+  "sources": [
+    {
+      "id": "frenchbreaches",
+      "name": "FrenchBreaches",
+      "lang": "fr",
+      "cat": "fuites",
+      "fr": true,
+      "home": "https://frenchbreaches.com/",
+      "feeds": ["https://frenchbreaches.com/feed/", "https://frenchbreaches.com/blog/feed/"],
+      "sitemap": "https://frenchbreaches.com/sitemap.xml"
+    },
+    {
+      "id": "ransomware",
+      "name": "Ransomware.live",
+      "type": "ransomware_live",
+      "lang": "en",
+      "cat": "ransomware"
+    },
+    {
+      "id": "zataz",
+      "name": "ZATAZ",
+      "lang": "fr",
+      "home": "https://www.zataz.com/",
+      "feeds": ["https://www.zataz.com/feed/"]
+    },
+    {
+      "id": "certfr",
+      "name": "CERT-FR",
+      "lang": "fr",
+      "cat": "alerte",
+      "fr": true,
+      "home": "https://www.cert.ssi.gouv.fr/",
+      "feeds": ["https://www.cert.ssi.gouv.fr/feed/"]
+    },
+    {
+      "id": "anssi",
+      "name": "ANSSI",
+      "lang": "fr",
+      "fr": true,
+      "home": "https://cyber.gouv.fr/",
+      "feeds": ["https://cyber.gouv.fr/feed", "https://cyber.gouv.fr/actualites/feed", "https://www.ssi.gouv.fr/feed/actualite/"],
+      "sitemap": "https://cyber.gouv.fr/sitemap.xml"
+    },
+    {
+      "id": "korben",
+      "name": "Korben",
+      "lang": "fr",
+      "filter": "cyber",
+      "home": "https://korben.info/",
+      "feeds": ["https://korben.info/feed"]
+    },
+    {
+      "id": "itconnect",
+      "name": "IT-Connect",
+      "lang": "fr",
+      "filter": "cyber",
+      "home": "https://www.it-connect.fr/",
+      "feeds": ["https://www.it-connect.fr/feed/"]
+    },
+    {
+      "id": "undernews",
+      "name": "Undernews",
+      "lang": "fr",
+      "home": "https://www.undernews.fr/",
+      "feeds": ["https://www.undernews.fr/feed"],
+      "sitemap": "https://www.undernews.fr/sitemap.xml"
+    },
+    {
+      "id": "numerama",
+      "name": "Numerama Cyberguerre",
+      "lang": "fr",
+      "home": "https://www.numerama.com/cyberguerre/",
+      "feeds": ["https://www.numerama.com/cyberguerre/feed/"]
+    },
+    {
+      "id": "thehackernews",
+      "name": "The Hacker News",
+      "lang": "en",
+      "home": "https://thehackernews.com/",
+      "feeds": ["https://feeds.feedburner.com/TheHackersNews"]
+    },
+    {
+      "id": "bleepingcomputer",
+      "name": "BleepingComputer",
+      "lang": "en",
+      "home": "https://www.bleepingcomputer.com/",
+      "feeds": ["https://www.bleepingcomputer.com/feed/"]
+    },
+    {
+      "id": "krebs",
+      "name": "Krebs on Security",
+      "lang": "en",
+      "home": "https://krebsonsecurity.com/",
+      "feeds": ["https://krebsonsecurity.com/feed/"]
+    },
+    {
+      "id": "schneier",
+      "name": "Schneier on Security",
+      "lang": "en",
+      "home": "https://www.schneier.com/",
+      "feeds": ["https://www.schneier.com/feed/atom/"]
+    },
+    {
+      "id": "darkreading",
+      "name": "Dark Reading",
+      "lang": "en",
+      "home": "https://www.darkreading.com/",
+      "feeds": ["https://www.darkreading.com/rss.xml"]
+    },
+    {
+      "id": "therecord",
+      "name": "The Record",
+      "lang": "en",
+      "home": "https://therecord.media/",
+      "feeds": ["https://therecord.media/feed"]
+    },
+    {
+      "id": "cyberscoop",
+      "name": "CyberScoop",
+      "lang": "en",
+      "home": "https://cyberscoop.com/",
+      "feeds": ["https://cyberscoop.com/feed/"]
+    },
+
+    {
+      "id": "geo-fr-etats",
+      "name": "Google Actualités",
+      "type": "gnews",
+      "group": "google-news",
+      "query": "cyberattaque France (Russie OR Chine OR Iran OR \"Corée du Nord\")",
+      "lang": "fr",
+      "cat": "geo",
+      "geo": true,
+      "max": 15
+    },
+    {
+      "id": "geo-fr-influence",
+      "name": "Google Actualités",
+      "type": "gnews",
+      "group": "google-news",
+      "query": "cyberguerre OR \"opération d'influence\" OR ingérence numérique France",
+      "lang": "fr",
+      "cat": "geo",
+      "geo": true,
+      "max": 15
+    },
+    {
+      "id": "geo-fr-anssi",
+      "name": "Google Actualités",
+      "type": "gnews",
+      "group": "google-news",
+      "query": "ANSSI menace étatique OR espionnage OR sabotage",
+      "lang": "fr",
+      "cat": "geo",
+      "geo": true,
+      "max": 15
+    },
+    {
+      "id": "geo-fr-hacktivistes",
+      "name": "Google Actualités",
+      "type": "gnews",
+      "group": "google-news",
+      "query": "hacktivistes DDoS France OR NoName057 OR pro-russes",
+      "lang": "fr",
+      "cat": "geo",
+      "geo": true,
+      "max": 15
+    },
+    {
+      "id": "geo-monde-conflits",
+      "name": "Google Actualités",
+      "type": "gnews",
+      "group": "google-news",
+      "query": "cyberattaques Ukraine OR Taïwan OR \"Moyen-Orient\" OR Iran conflit géopolitique",
+      "lang": "fr",
+      "cat": "geo",
+      "geo": true,
+      "max": 15
+    },
+    {
+      "id": "geo-en-europe",
+      "name": "Google News",
+      "type": "gnews",
+      "group": "google-news",
+      "query": "state-sponsored cyber attack Europe OR France OR NATO",
+      "lang": "en",
+      "cat": "geo",
+      "geo": true,
+      "max": 15
+    }
+  ],
+
+  "ctf_news": [
+    { "query": "CTF cybersécurité France", "lang": "fr" },
+    { "query": "\"Capture the Flag\" cybersécurité challenge", "lang": "fr" }
+  ]
+}
