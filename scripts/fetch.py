@@ -397,6 +397,7 @@ def build_news() -> dict:
     items.sort(key=lambda i: i["date"], reverse=True)
     return {
         "generated": iso(NOW),
+        "refresh_minutes": CONFIG.get("refresh_minutes", 10),
         "retention_hours": CONFIG.get("retention_hours", 72),
         "items": items,
         "sources": status,
@@ -478,7 +479,7 @@ def build_ctf() -> dict:
             pass
     news.sort(key=lambda i: i["date"], reverse=True)
 
-    return {"generated": iso(NOW), "events": ordered, "news": news[:30], "error": error}
+    return {"generated": iso(NOW), "refresh_minutes": CONFIG.get("refresh_minutes", 10), "events": ordered, "news": news[:30], "error": error}
 
 
 # --------------------------------------------------------------------------- #

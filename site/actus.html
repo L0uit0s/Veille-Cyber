@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#07132e">
   <meta name="robots" content="noindex">
-  <title>CTF · Veille cyber</title>
+  <title>Toutes les actualités · Veille cyber</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b2251'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%239ec2ff' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='10' fill='none' stroke='%239ec2ff' stroke-width='3' opacity='.55'/%3E%3Cpath d='M32 32 L48 18' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,8 +22,8 @@
       </a>
       <nav class="nav" aria-label="Pages">
         <a href="./">Accueil</a>
-        <a href="actus.html">Toutes les actus</a>
-        <a href="ctf.html" aria-current="page">CTF</a>
+        <a href="actus.html" aria-current="page">Toutes les actus</a>
+        <a href="ctf.html">CTF</a>
       </nav>
       <div class="tools">
         <span id="stamp" class="pill" role="status">Chargement…</span>
@@ -38,34 +38,44 @@
   <main>
     <section class="page-head">
       <div class="wrap">
-        <h1>Prochains CTF</h1>
-        <p>Compétitions en ligne et en France, d'après CTFtime et l'agenda manuel du dépôt.</p>
+        <h1>Toutes les actualités</h1>
+        <p>Les 72 dernières heures, toutes sources confondues. <span id="count"></span></p>
       </div>
     </section>
 
-    <div class="wrap ctf-layout">
-      <section>
-        <div id="tabs" class="tabs" role="group" aria-label="Type de CTF"></div>
-        <div id="events" class="panel"><div class="empty">Chargement du calendrier…</div></div>
-      </section>
-
-      <section>
-        <h2>Actualité CTF</h2>
-        <div id="news" class="panel"></div>
-      </section>
-
-      <section>
-        <h2>S’entraîner toute l’année</h2>
-        <div id="platforms" class="platforms"></div>
-      </section>
+    <div class="wrap layout">
+      <aside class="rail" aria-label="Filtres">
+        <div class="search">
+          <label class="sr" for="q">Rechercher dans les articles</label>
+          <input id="q" type="search" placeholder="Rechercher (touche /)" autocomplete="off">
+        </div>
+        <div>
+          <h2>Rubriques</h2>
+          <div id="filters" class="filters"></div>
+        </div>
+        <div id="sources-box">
+          <h2>Sources</h2>
+          <div id="sources" class="filters"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="hide-read"> Masquer les articles lus</label>
+      </aside>
+      <div id="feed" aria-live="polite">
+        <div class="panel"><div class="empty">Chargement des actualités…</div></div>
+      </div>
     </div>
   </main>
 
   <footer class="site-footer">
-    <div class="wrap"><span>Calendrier mis à jour toutes les 10 minutes depuis CTFtime.</span></div>
+    <div class="wrap">
+      <details>
+        <summary id="status-summary">État des sources</summary>
+        <ul id="status-list" class="status"></ul>
+      </details>
+      <span>Les données sont collectées automatiquement toutes les 10 minutes et conservées 72 heures.</span>
+    </div>
   </footer>
 
   <script src="assets/common.js"></script>
-  <script src="assets/ctf.js"></script>
+  <script src="assets/news.js"></script>
 </body>
 </html>

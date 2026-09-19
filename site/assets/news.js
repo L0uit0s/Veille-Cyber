@@ -1,5 +1,4 @@
-// Page Actualités : chargement, filtres, rendu, actualisation automatique
-const REFRESH_MS = 5 * 60 * 1000;
+// Page « Toutes les actualités » : filtres, recherche, lecture, actualisation
 const FILTERS = [
   { id: "all", label: "Tout", test: () => true },
   { id: "alerte", label: "Alertes et avis", test: (i) => i.cat === "alerte" || i.cat === "avis" },
@@ -8,26 +7,32 @@ const FILTERS = [
   { id: "geo", label: "Géopolitique", test: (i) => i.geo || i.cat === "geo" },
   { id: "fr", label: "Impact France", test: (i) => i.fr },
 ];
+const hashFilter = () => FILTERS.find((f) => f.id === location.hash.slice(1))?.id;
 
 const state = {
   data: null,
-  filter: store.get("filter", "all"),
+  newIds: new Set(),
+  filter: hashFilter() || store.get("filter", "all"),
   source: "",
   q: "",
   hideRead: store.get("hideRead", false),
   read: new Set(store.get("read", [])),
-  loadedAt: 0,
 };
 
-const isFresh = (item) => Date.now() - new Date(item.date).getTime() < state.data.retention_hours * 3600e3;
+function setFilter(id) {
+  state.filter = id;
+  store.set("filter", id);
+  history.replaceState(null, "", id === "all" ? location.pathname : `#${id}`);
+  render();
+}
 
-function visibleItems({ ignoreFilter = false, ignoreSource = false } = {}) {
+function visibleItems() {
   const f = FILTERS.find((x) => x.id === state.filter) || FILTERS[0];
   const q = state.q.trim().toLowerCase();
   return state.data.items.filter((i) => {
-    if (!isFresh(i)) return false;
-    if (!ignoreFilter && !f.test(i)) return false;
-    if (!ignoreSource && state.source && i.sid !== state.source) return false;
+    if (!isFresh(i, state.data)) return false;
+    if (!f.test(i)) return false;
+    if (state.source && i.sid !== state.source) return false;
     if (state.hideRead && state.read.has(i.id)) return false;
     if (q && !`${i.title} ${i.summary} ${i.source} ${i.origin || ""}`.toLowerCase().includes(q)) return false;
     return true;
@@ -35,17 +40,10 @@ function visibleItems({ ignoreFilter = false, ignoreSource = false } = {}) {
 }
 
 function renderRail() {
-  const fresh = state.data.items.filter(isFresh);
-  const box = $("#filters");
-  box.replaceChildren(
-    ...FILTERS.map((f) =>
-      h("button", {
-        type: "button",
-        "aria-pressed": String(state.filter === f.id),
-        onclick: () => { state.filter = f.id; store.set("filter", f.id); render(); },
-      }, h("span", {}, f.label), h("span", { class: "n" }, fresh.filter(f.test).length))
-    )
-  );
+  const fresh = state.data.items.filter((i) => isFresh(i, state.data));
+  $("#filters").replaceChildren(...FILTERS.map((f) =>
+    h("button", { type: "button", "aria-pressed": String(state.filter === f.id), onclick: () => setFilter(f.id) },
+      h("span", {}, f.label), h("span", { class: "n" }, fresh.filter(f.test).length))));
 
   const bySource = new Map();
   for (const i of fresh) {
@@ -53,36 +51,29 @@ function renderRail() {
     cur.n += 1;
     bySource.set(i.sid, cur);
   }
-  const srcBox = $("#sources");
   const entries = [...bySource.entries()].sort((a, b) => b[1].n - a[1].n);
-  srcBox.replaceChildren(
-    h("button", {
-      type: "button", "aria-pressed": String(state.source === ""),
-      onclick: () => { state.source = ""; render(); },
-    }, h("span", {}, "Toutes les sources"), h("span", { class: "n" }, fresh.length)),
+  $("#sources").replaceChildren(
+    h("button", { type: "button", "aria-pressed": String(state.source === ""), onclick: () => { state.source = ""; render(); } },
+      h("span", {}, "Toutes les sources"), h("span", { class: "n" }, fresh.length)),
     ...entries.map(([sid, s]) =>
-      h("button", {
-        type: "button", "aria-pressed": String(state.source === sid),
-        onclick: () => { state.source = state.source === sid ? "" : sid; render(); },
-      }, h("span", {}, s.name), h("span", { class: "n" }, s.n))
-    )
-  );
+      h("button", { type: "button", "aria-pressed": String(state.source === sid), onclick: () => { state.source = state.source === sid ? "" : sid; render(); } },
+        h("span", {}, s.name), h("span", { class: "n" }, s.n))));
 }
 
 function renderItem(i) {
   const d = new Date(i.date);
+  const cat = catOf(i);
   const minutes = (Date.now() - d.getTime()) / 60000;
-  const isRead = state.read.has(i.id);
   const mark = () => {
     state.read.add(i.id);
     store.set("read", [...state.read]);
     row.classList.add("is-read");
   };
   const link = h("a", { href: safeUrl(i.url), target: "_blank", rel: "noopener noreferrer", onclick: mark, onauxclick: mark }, i.title);
-  const row = h("article", { class: `row${isRead ? " is-read" : ""}`, "data-cat": i.geo && i.cat === "actu" ? "geo" : i.cat },
+  const row = h("article", { class: `row${state.read.has(i.id) ? " is-read" : ""}${state.newIds.has(i.id) ? " is-new" : ""}`, "data-cat": cat },
     h("div", { class: "when" },
       h("time", { datetime: i.date, title: d.toLocaleString("fr-FR") }, fmtTime(d)),
-      minutes < 60 ? h("span", { class: "live", title: "Publié il y a moins d'une heure" }) : null),
+      minutes < 60 ? h("span", { class: "new-dot", title: "Publié il y a moins d'une heure" }) : null),
     h("div", { class: "body" },
       h("div", { class: "meta" },
         h("span", { class: "src" }, i.source),
@@ -93,17 +84,16 @@ function renderItem(i) {
         i.geo ? h("span", { class: "tag geo" }, "Géopolitique") : null,
         i.fr ? h("span", { class: "tag fr" }, "France") : null),
       h("h3", {}, link),
-      i.summary ? h("p", { class: "sum" }, i.summary) : null)
-  );
+      i.summary ? h("p", { class: "sum" }, i.summary) : null));
   return row;
 }
 
 function renderFeed() {
   const items = visibleItems();
   const feed = $("#feed");
+  $("#count").textContent = `${items.length} article${items.length > 1 ? "s" : ""}`;
   if (!items.length) {
-    feed.replaceChildren(h("div", { class: "panel" }, h("div", { class: "empty" },
-      "Aucun article ne correspond à ces filtres sur les 72 dernières heures.")));
+    feed.replaceChildren(h("div", { class: "panel" }, h("div", { class: "empty" }, "Aucun article ne correspond à ces filtres sur les 72 dernières heures.")));
     return;
   }
   const groups = new Map();
@@ -120,68 +110,45 @@ function renderFeed() {
   feed.replaceChildren(panel);
 }
 
-function renderStatus() {
-  const list = $("#status-list");
-  const bad = state.data.sources.filter((s) => s.status !== "ok").length;
-  $("#status-summary").textContent = bad
-    ? `État des sources : ${bad} en erreur sur ${state.data.sources.length}`
-    : `État des sources : ${state.data.sources.length} sur ${state.data.sources.length} disponibles`;
-  list.replaceChildren(...state.data.sources.map((s) =>
-    h("li", { class: s.status === "ok" ? "" : "ko" },
-      h("i"),
-      h("div", {},
-        h("span", {}, s.name),
-        h("small", {}, s.status === "ok" ? `${s.count} article(s), via ${s.via}` : `Erreur : ${s.error}`)))
-  ));
-}
-
 function renderStamp() {
-  if (!state.data) return;
-  $("#stamp").textContent = `Données du ${new Date(state.data.generated).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} (${ago(new Date(state.data.generated))})`;
+  if (state.data) setStamp(state.data);
 }
 
 function render() {
-  const read = new Set(state.data.items.map((i) => i.id)); // oublie les articles disparus
-  state.read = new Set([...state.read].filter((id) => read.has(id)));
+  const ids = new Set(state.data.items.map((i) => i.id)); // oublie les articles disparus
+  state.read = new Set([...state.read].filter((id) => ids.has(id)));
   store.set("read", [...state.read]);
   renderRail();
   renderFeed();
-  renderStatus();
+  renderSourceStatus(state.data);
   renderStamp();
 }
 
-async function load(manual = false) {
-  const btn = $("#refresh");
-  btn.disabled = true;
-  try {
-    state.data = await loadJSON("data/news.json");
-    state.loadedAt = Date.now();
-    render();
-  } catch (err) {
-    if (!state.data) {
-      $("#feed").replaceChildren(h("div", { class: "panel" }, h("div", { class: "error" },
-        h("strong", {}, "Impossible de charger les actualités."),
-        "Le premier déploiement n'est peut-être pas terminé. Réessaie dans une minute.",
-        h("div", {}, h("button", { type: "button", onclick: () => load(true) }, "Réessayer")))));
-      $("#stamp").textContent = "Hors ligne";
-    } else if (manual) {
-      $("#stamp").textContent = "Actualisation impossible pour le moment";
-    }
-  } finally {
-    btn.disabled = false;
-  }
+async function load() {
+  const res = await fetchNews(state.data);
+  state.data = res.data;
+  state.newIds = new Set(res.newIds);
+  render();
+  return res;
+}
+
+function showError() {
+  $("#feed").replaceChildren(h("div", { class: "panel" }, h("div", { class: "error" },
+    h("strong", {}, "Impossible de charger les actualités."),
+    "Le premier déploiement n'est peut-être pas terminé. Réessaie dans une minute.",
+    h("div", {}, h("button", { class: "btn solid", type: "button", onclick: () => location.reload() }, "Recharger la page")))));
+  $("#stamp").textContent = "Hors ligne";
 }
 
 $("#q").addEventListener("input", (e) => { state.q = e.target.value; if (state.data) renderFeed(); });
 $("#hide-read").checked = state.hideRead;
 $("#hide-read").addEventListener("change", (e) => { state.hideRead = e.target.checked; store.set("hideRead", state.hideRead); if (state.data) render(); });
-$("#refresh").addEventListener("click", () => load(true));
+window.addEventListener("hashchange", () => { const id = hashFilter() || "all"; if (state.data && id !== state.filter) { state.filter = id; render(); } });
 document.addEventListener("keydown", (e) => {
   if (e.key === "/" && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) { e.preventDefault(); $("#q").focus(); }
 });
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && Date.now() - state.loadedAt > 2 * 60 * 1000) load();
-});
-setInterval(() => load(), REFRESH_MS);
-setInterval(() => { if (state.data) { renderStamp(); } }, 30 * 1000);
-load();
+
+window.__restamp = renderStamp;
+wireRefresh(load);
+autoRefresh(load, 3 * 60 * 1000);
+load().catch(showError);

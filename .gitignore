@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+# Les fichiers JSON de site/data sont générés par scripts/fetch.py à chaque exécution
+site/data/*.json

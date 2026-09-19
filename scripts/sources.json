@@ -1,4 +1,5 @@
 {
+  "refresh_minutes": 10,
   "retention_hours": 72,
   "max_per_source": 40,
   "ransomware_world_cap": 40,

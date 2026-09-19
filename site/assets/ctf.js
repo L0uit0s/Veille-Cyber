@@ -25,18 +25,14 @@ function whenPill(ev) {
 
 function dateRange(ev) {
   const opt = { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" };
-  const s = new Date(ev.start), e = new Date(ev.finish);
-  return `${s.toLocaleString("fr-FR", opt)} → ${e.toLocaleString("fr-FR", opt)}`;
+  return `${new Date(ev.start).toLocaleString("fr-FR", opt)} → ${new Date(ev.finish).toLocaleString("fr-FR", opt)}`;
 }
 
 function renderEvent(ev) {
   const s = new Date(ev.start);
-  const inProgress = s <= new Date();
-  const shown = inProgress ? new Date() : s;
+  const shown = s <= new Date() ? new Date() : s;
   return h("article", { class: "event" },
-    h("div", { class: "date" },
-      h("b", {}, shown.getDate()),
-      h("span", {}, shown.toLocaleDateString("fr-FR", { month: "short" }))),
+    h("div", { class: "date" }, h("b", {}, shown.getDate()), h("span", {}, shown.toLocaleDateString("fr-FR", { month: "short" }))),
     h("div", {},
       h("h3", {}, h("a", { href: safeUrl(ev.url || ev.ctftime_url), target: "_blank", rel: "noopener noreferrer" }, ev.title)),
       h("div", { class: "info" },
@@ -60,14 +56,9 @@ function renderEvents() {
       t.label, h("span", { class: "n" }, evs.filter(t.test).length))));
   const tab = TABS.find((t) => t.id === state.tab) || TABS[0];
   const list = evs.filter(tab.test);
-  const box = $("#events");
-  if (!list.length) {
-    box.replaceChildren(h("div", { class: "empty" }, state.data.error
-      ? `Le calendrier n'a pas pu être chargé (${state.data.error}).`
-      : "Aucun CTF à venir dans cette catégorie."));
-    return;
-  }
-  box.replaceChildren(...list.map(renderEvent));
+  $("#events").replaceChildren(...(list.length
+    ? list.map(renderEvent)
+    : [h("div", { class: "empty" }, state.data.error ? `Le calendrier n'a pas pu être chargé (${state.data.error}).` : "Aucun CTF à venir dans cette catégorie.")]));
 }
 
 function renderNews() {
@@ -89,31 +80,26 @@ function renderPlatforms() {
     h("a", { href: p.url, target: "_blank", rel: "noopener noreferrer" }, h("b", {}, p.name), h("span", {}, p.desc))));
 }
 
-function renderStamp() {
-  if (!state.data) return;
-  $("#stamp").textContent = `Données ${ago(new Date(state.data.generated))}`;
+function renderStamp() { if (state.data) setStamp(state.data); }
+
+async function load() {
+  const data = await loadJSON("data/ctf.json");
+  const prev = new Set((state.data?.events || []).map((e) => e.id));
+  const newIds = state.data ? data.events.filter((e) => !prev.has(e.id)) : [];
+  const res = { data, added: newIds.length, changed: !state.data || state.data.generated !== data.generated };
+  state.data = data;
+  renderEvents(); renderNews(); renderStamp();
+  return res;
 }
 
-async function load(manual = false) {
-  const btn = $("#refresh");
-  btn.disabled = true;
-  try {
-    state.data = await loadJSON("data/ctf.json");
-    renderEvents(); renderNews(); renderStamp();
-  } catch {
-    if (!state.data) {
-      $("#events").replaceChildren(h("div", { class: "error" }, h("strong", {}, "Impossible de charger le calendrier."), "Réessaie dans une minute."));
-      $("#stamp").textContent = "Hors ligne";
-    } else if (manual) {
-      $("#stamp").textContent = "Actualisation impossible pour le moment";
-    }
-  } finally {
-    btn.disabled = false;
-  }
+function showError() {
+  $("#events").replaceChildren(h("div", { class: "error" }, h("strong", {}, "Impossible de charger le calendrier."),
+    "Réessaie dans une minute.", h("div", {}, h("button", { class: "btn solid", type: "button", onclick: () => location.reload() }, "Recharger la page"))));
+  $("#stamp").textContent = "Hors ligne";
 }
 
-$("#refresh").addEventListener("click", () => load(true));
 renderPlatforms();
-setInterval(() => load(), 10 * 60 * 1000);
-setInterval(renderStamp, 30 * 1000);
-load();
+window.__restamp = renderStamp;
+wireRefresh(load, ["événement", "événements"]);
+autoRefresh(load, 5 * 60 * 1000, ["événement", "événements"]);
+load().catch(showError);

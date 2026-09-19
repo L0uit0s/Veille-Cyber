@@ -3,11 +3,11 @@
 Site statique de veille cybersécurité : agrège une vingtaine de sources (presse cyber, CERT-FR, ANSSI, fuites de données, ransomware, géopolitique) et un calendrier de CTF. Hébergé gratuitement sur **GitHub Pages**, mis à jour automatiquement par **GitHub Actions**.
 
 ```
-.github/workflows/update.yml   planificateur (toutes les 15 min) + déploiement
+.github/workflows/update.yml   planificateur (toutes les 10 min) + déploiement
 scripts/fetch.py               récupère les flux, filtre, dédoublonne, écrit les JSON
 scripts/sources.json           la liste des sources (à éditer)
 scripts/ctf_manual.json        vos CTF ajoutés à la main
-site/                          le site (HTML/CSS/JS, sans framework)
+site/                          le site : index.html (accueil), actus.html, ctf.html, assets/
 site/data/                     news.json et ctf.json, générés à chaque exécution
 ```
 
@@ -22,14 +22,18 @@ site/data/                     news.json et ctf.json, générés à chaque exéc
 ## Comportement
 
 - **Fraîcheur** : le script ne garde que les articles des 72 dernières heures (`retention_hours` dans `sources.json`), et le navigateur refiltre aussi côté client, donc une page laissée ouverte se nettoie seule.
-- **Actualisation** : les données sont régénérées toutes les 15 minutes ; la page recharge le JSON toutes les 5 minutes et au retour sur l'onglet.
+- **Actualisation** : le serveur (GitHub Actions) régénère les données toutes les 10 minutes (`refresh_minutes` dans `sources.json`, `cron` dans le workflow). Le navigateur relit ces données toutes les 3 minutes et au retour sur l'onglet.
+- **Bouton « Actualiser »** : il relit immédiatement les données publiées, affiche un chargement, puis un message : nombre de nouveaux articles, « déjà à jour » avec l'heure de la prochaine collecte, ou erreur réseau. Il ne peut pas forcer une nouvelle collecte auprès des sites sources : celle-ci se fait côté serveur.
 - **Rubriques** : Alertes et avis (CERT-FR), Fuites en France, Ransomware, Géopolitique, Impact France.
   - *Géopolitique* : requêtes Google Actualités ciblées (cyberattaques étatiques, hacktivistes, ingérences, conflits) + détection par mots-clés (Russie, Chine, Iran, Corée du Nord, APT, OTAN, etc.) sur toutes les sources.
   - *Impact France* : article qui mentionne explicitement la France, l'ANSSI, la CNIL, etc., victime française de ransomware, source française officielle.
 - **Sources généralistes** (Korben, IT-Connect) : seuls les articles liés à la sécurité sont conservés.
 - **Ransomware** : toutes les victimes françaises + les 40 dernières victimes mondiales.
 - **Articles lus** : cliquer sur un titre le grise (stocké dans le navigateur uniquement).
-- **Pages** : `index.html` (actualités), `ctf.html` (CTF en ligne / en France, actu CTF, plateformes d'entraînement).
+- **Pages** :
+  - `index.html` : accueil, avec le radar des articles, les chiffres clés, les **5 dernières actualités** (hors avis CERT-FR et listes de victimes, qui ont leurs rubriques) et les raccourcis par rubrique.
+  - `actus.html` : **toutes les actualités** des 72 dernières heures, avec recherche, filtres, sources et suivi des articles lus (les liens `actus.html#geo`, `#fr`, `#alerte`, `#fuites`, `#ransomware` ouvrent directement une rubrique).
+  - `ctf.html` : CTF en ligne / en France, actu CTF, plateformes d'entraînement.
 
 ## Ajouter ou retirer une source
 
@@ -71,7 +75,7 @@ Dans `scripts/ctf_manual.json` :
 ## Limites à connaître
 
 - **Quasi temps réel, pas instantané** : le planificateur de GitHub Actions peut retarder une exécution de plusieurs minutes aux heures de pointe.
-- **Dépôt public** : GitHub Pages sur un dépôt privé exige un plan payant, et un cron toutes les 15 min consommerait le quota gratuit d'Actions. Le site ne contient que de l'information publique.
+- **Dépôt public** : GitHub Pages sur un dépôt privé exige un plan payant, et un cron toutes les 10 min consommerait le quota gratuit d'Actions. Le site ne contient que de l'information publique.
 - **Inactivité** : GitHub désactive les workflows planifiés après 60 jours sans activité dans le dépôt. Le workflow tente de se réactiver lui-même ; si ça échoue, GitHub envoie un e-mail et un clic sur « Enable workflow » suffit.
 - **Flux introuvables** : FrenchBreaches, l'ANSSI et Undernews n'ont pas de flux RSS confirmé. Le script essaie l'autodétection puis le sitemap ; vérifiez leur état au premier lancement.
 - **Google Actualités** est utilisé pour la géopolitique : les liens passent par une redirection Google.

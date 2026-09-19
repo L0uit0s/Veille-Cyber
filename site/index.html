@@ -4,56 +4,95 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#07132e">
   <meta name="robots" content="noindex">
-  <title>Veille cyber</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <title>Veille cyber · Accueil</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b2251'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%239ec2ff' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='10' fill='none' stroke='%239ec2ff' stroke-width='3' opacity='.55'/%3E%3Cpath d='M32 32 L48 18' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <header class="top">
-    <a class="brand" href="./">Veille cyber</a>
-    <nav aria-label="Pages">
-      <a href="./" aria-current="page">Actualités</a>
-      <a href="ctf.html">CTF</a>
-    </nav>
-    <div class="stamp">
-      <span id="stamp" role="status">Chargement…</span>
-      <button id="refresh" type="button">Actualiser</button>
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="./" aria-label="Veille cyber, accueil">
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".5"/><path d="M12 12 19 6" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="1.9" fill="var(--accent)"/></svg>
+        <span>Veille cyber</span>
+      </a>
+      <nav class="nav" aria-label="Pages">
+        <a href="./" aria-current="page">Accueil</a>
+        <a href="actus.html">Toutes les actus</a>
+        <a href="ctf.html">CTF</a>
+      </nav>
+      <div class="tools">
+        <span id="stamp" class="pill" role="status">Chargement…</span>
+        <button id="refresh" class="btn-refresh" type="button" title="Recharger les données du site">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          <span class="lbl">Actualiser</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <div class="layout">
-    <aside class="rail" aria-label="Filtres">
-      <div class="search">
-        <label class="sr" for="q">Rechercher dans les articles</label>
-        <input id="q" type="search" placeholder="Rechercher (touche /)" autocomplete="off">
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="live-pill"><i></i><span id="hero-stamp">Chargement…</span></span>
+          <h1>Ce qui se passe en cyber, <em>maintenant.</em></h1>
+          <p class="lead">Alertes du CERT-FR, fuites de données, ransomware et géopolitique : une vingtaine de sources réunies en un seul endroit.</p>
+          <div class="cta">
+            <a class="btn primary" href="actus.html">Toutes les actualités <span aria-hidden="true">→</span></a>
+            <a class="btn ghost" href="ctf.html">Calendrier CTF</a>
+          </div>
+        </div>
+        <figure class="radar-wrap" aria-hidden="true">
+          <div class="radar"><div class="sweep"></div><div id="radar-dots"></div><span class="core"></span></div>
+          <figcaption>Chaque point est un article des 72 dernières heures : plus il est proche du centre, plus il est récent.</figcaption>
+        </figure>
       </div>
-      <div>
-        <h2>Rubriques</h2>
-        <div id="filters" class="filters"></div>
-      </div>
-      <div id="sources-box">
-        <h2>Sources</h2>
-        <div id="sources" class="filters"></div>
-      </div>
-      <label class="check"><input type="checkbox" id="hide-read"> Masquer les articles lus.</label>
-    </aside>
-    <main id="feed" aria-live="polite">
-      <div class="panel"><div class="empty">Chargement des actualités…</div></div>
-    </main>
-  </div>
+    </section>
 
-  <footer>
-    <details>
-      <summary id="status-summary">État des sources</summary>
-      <ul id="status-list" class="status"></ul>
-    </details>
+    <div class="wrap">
+      <div id="stats" class="stats" aria-label="Chiffres clés"></div>
+
+      <section class="section" aria-labelledby="t-top">
+        <div class="section-head">
+          <h2 id="t-top">Les 5 dernières actualités</h2>
+          <a class="more" href="actus.html">Tout voir →</a>
+        </div>
+        <div id="top5" class="top5" aria-live="polite">
+          <div class="card lead skel"></div><div class="card skel"></div><div class="card skel"></div><div class="card skel"></div><div class="card skel"></div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="t-cats">
+        <div class="section-head"><h2 id="t-cats">Explorer par rubrique</h2></div>
+        <div id="cats" class="cats"></div>
+      </section>
+
+      <section class="band">
+        <div>
+          <h2>Tout ce qui est paru, sans le bruit.</h2>
+          <p>Les <strong id="all-count">–</strong> articles des 72 dernières heures, avec recherche, filtres et suivi des lectures.</p>
+        </div>
+        <a class="btn primary" href="actus.html">Ouvrir la liste complète <span aria-hidden="true">→</span></a>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <details>
+        <summary id="status-summary">État des sources</summary>
+        <ul id="status-list" class="status"></ul>
+      </details>
+      <span>Les données sont collectées automatiquement toutes les 10 minutes et conservées 72 heures.</span>
+    </div>
   </footer>
 
   <script src="assets/common.js"></script>
-  <script src="assets/news.js"></script>
+  <script src="assets/home.js"></script>
 </body>
 </html>
